@@ -5,6 +5,7 @@ import com.starling.starlingroundup.customExceptions.HttpNotFoundException;
 import com.starling.starlingroundup.model.*;
 import com.starling.starlingroundup.utils.Generators;
 import com.starling.starlingroundup.utils.Math;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.Collection;
 
 @Service
 public class RoundUpService extends ApiService {
@@ -24,6 +26,7 @@ public class RoundUpService extends ApiService {
     private static final String PUT_MONEY_SAVINGS_GOAL_URI_FORMAT = "/account/%s/savings-goals/%s/add-money/%s";
 
     @Value(value = "${starling.roundup.time_interval:7}")
+    @Setter
     private int timeWindowLength;
 
     private TemporalAmount temporalAmount;
@@ -52,9 +55,7 @@ public class RoundUpService extends ApiService {
 
         FeedItems feedItems = feedService.getSettledFeedItems(account.getAccountUid(), startTime, endTime);
 
-        CurrencyAndAmount roundUpCurrencyAndAmount = feedItems.feedItems().stream()
-                .reduce(CurrencyAndAmount.getEmpty(account.getCurrency()),
-                        (subtotal, feedItem) -> subtotal.add(getFeedItemRoundUp(feedItem)), CurrencyAndAmount::add);
+        CurrencyAndAmount roundUpCurrencyAndAmount = getFeedItemsTotalRoundUp(feedItems.feedItems(), account.getCurrency());
 
         return new RoundUpWindow(roundUpCurrencyAndAmount, startTime, endTime);
     }
@@ -84,9 +85,15 @@ public class RoundUpService extends ApiService {
                 .block(TIMEOUT);
     }
 
+    private CurrencyAndAmount getFeedItemsTotalRoundUp(Collection<FeedItem> feedItems, String currency) {
+        return feedItems.stream()
+                .reduce(CurrencyAndAmount.getEmpty(currency),
+                        (subtotal, feedItem) -> subtotal.add(getFeedItemRoundUp(feedItem)), CurrencyAndAmount::add);
+    }
+
     private CurrencyAndAmount getFeedItemRoundUp(FeedItem feedItem) {
         CurrencyAndAmount amount = feedItem.getAmount();
-        long newSum = Math.roundLongToNearest100(amount.getMinorUnits()) - amount.getMinorUnits();
+        long newSum = Math.roundLongToNext100(amount.getMinorUnits()) - amount.getMinorUnits();
         return new CurrencyAndAmount(amount.getCurrency(), newSum);
     }
 }

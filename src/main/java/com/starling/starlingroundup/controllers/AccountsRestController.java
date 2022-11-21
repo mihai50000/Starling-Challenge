@@ -1,5 +1,6 @@
 package com.starling.starlingroundup.controllers;
 
+import com.starling.starlingroundup.customExceptions.HttpNotFoundException;
 import com.starling.starlingroundup.model.AccountsWrapper;
 import com.starling.starlingroundup.service.AccountsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class AccountsRestController {
             AccountsWrapper accountsWrapper = accountsService.getAccounts();
 
             return ResponseEntity.ok(accountsWrapper);
+        } catch (HttpNotFoundException e) {
+          return ResponseEntity.notFound().build();
         } catch (RuntimeException e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

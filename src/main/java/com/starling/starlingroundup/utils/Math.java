@@ -2,7 +2,7 @@ package com.starling.starlingroundup.utils;
 
 public class Math {
 
-    public static long roundLongToNearest100(long number) {
-        return (number / 100 + 1) * 100;
+    public static long roundLongToNext100(long number) {
+        return number - number % 100 + 100;
     }
 }

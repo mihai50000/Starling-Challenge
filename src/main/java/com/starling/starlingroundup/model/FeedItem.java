@@ -1,10 +1,16 @@
 package com.starling.starlingroundup.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class FeedItem {
     private String feedItemUid;
     private String categoryUid;

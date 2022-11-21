@@ -3,6 +3,7 @@ package com.starling.starlingroundup.service;
 import com.starling.starlingroundup.customExceptions.HttpInternalServerException;
 import com.starling.starlingroundup.customExceptions.HttpNotFoundException;
 import com.starling.starlingroundup.model.FeedItems;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class FeedService extends ApiService {
     private static final String SETTLED_FEED_ITEMS_URI_FORMAT = "/feed/account/%s/settled-transactions-between?minTransactionTimestamp=%s&&maxTransactionTimestamp=%s";
 
     @Value(value = "${starling.roundup.time_interval:7}")
+    @Setter
     private int timeWindowLength;
 
     private TemporalAmount temporalAmount;
